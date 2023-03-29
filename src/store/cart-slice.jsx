@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { uiActions } from "./ui-slice";
 
 const cartSlice = createSlice({
   name: "cart",
@@ -18,7 +19,7 @@ const cartSlice = createSlice({
           price: newItem.price,
           quantity: 1,
           totalPrice: newItem.price,
-          name: newItem.title
+          name: newItem.title,
         });
       } else {
         existingItem.quantity++;
@@ -30,8 +31,8 @@ const cartSlice = createSlice({
       const existingItem = state.items.find((item) => item.id === id);
       state.totalQuantity--;
       if (existingItem.quantity === 1) {
-       state.items =state.items.filter((item) => item.id !==id);
-      }else {
+        state.items = state.items.filter((item) => item.id !== id);
+      } else {
         existingItem.quantity--;
         existingItem.totalPrice = existingItem.totalPrice - existingItem.price;
       }
@@ -39,6 +40,50 @@ const cartSlice = createSlice({
   },
 });
 
+export const sendCartData = (cart) => {
+  return async (dispatch) => {
+    dispatch(
+      uiActions.showNotification({
+        status: "pending",
+        title: "Sending..",
+        message: "Sending cart data!",
+      })
+    );
+
+    const sendRequest = async () => {
+      const res = await fetch(
+        "https://expensetracker-a99e6-default-rtdb.firebaseio.com/cart.json",
+        {
+          method: "PUT",
+          body: JSON.stringify(cart),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("sending cart data failed");
+      }
+    };
+    try {
+      await sendRequest();
+
+      dispatch(
+        uiActions.showNotification({
+          status: "Success",
+          title: "Success!!",
+          message: "Sent cart data Successfully!",
+        })
+      );
+    } catch (error) {
+      dispatch(
+        uiActions.showNotification({
+          status: "Error",
+          title: "Errror!!",
+          message: "Sent cart data failed!",
+        })
+      );
+    }
+  };
+};
 
 export const cartActions = cartSlice.actions;
 
