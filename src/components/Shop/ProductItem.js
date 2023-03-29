@@ -11,6 +11,7 @@ const dispatch = useDispatch();
   const { title, price, description, id } = props;
  
   const addToCartHandler = () => {
+    //send http request and fetch(firebase URL)
     dispatch(
       cartActions.addItemToCart({
       id,
